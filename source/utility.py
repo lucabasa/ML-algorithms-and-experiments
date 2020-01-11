@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __status__ = 'development'
 
 
@@ -81,10 +81,10 @@ def grid_search(data, target, estimator, param_grid, scoring, cv, random=False):
     
     if random:
         grid = RandomizedSearchCV(estimator=estimator, param_distributions=param_grid, cv=cv, scoring=scoring, 
-                                  n_iter=random, n_jobs=-1, random_state=434, iid=False)
+                                  n_iter=random, n_jobs=-1, random_state=434, iid=False, return_train_score=True)
     else:
         grid = GridSearchCV(estimator=estimator, param_grid=param_grid, 
-                            cv=cv, scoring=scoring, n_jobs=-1, return_train_score=False)
+                            cv=cv, scoring=scoring, n_jobs=-1, return_train_score=True)
     
     pd.options.mode.chained_assignment = None  # turn on and off a warning of pandas
     tmp = data.copy()
@@ -94,12 +94,10 @@ def grid_search(data, target, estimator, param_grid, scoring, cv, random=False):
     result = pd.DataFrame(grid.cv_results_).sort_values(by='mean_test_score', 
                                                         ascending=False).reset_index()
     
-    print(result.columns)
-    
     del result['params']
     times = [col for col in result.columns if col.endswith('_time')]
     params = [col for col in result.columns if col.startswith('param_')]
     
-    result = result[params + ['mean_test_score', 'std_test_score'] + times]
+    result = result[params + ['mean_train_score', 'std_train_score', 'mean_test_score', 'std_test_score'] + times]
     
     return result, grid.best_params_, grid.best_estimator_

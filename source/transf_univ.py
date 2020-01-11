@@ -42,6 +42,7 @@ class df_imputer(TransformerMixin, BaseEstimator):
         self.strategy = strategy
         self.imp = None
         self.statistics_ = None
+        self.columns = None
 
     def fit(self, X, y=None):
         self.imp = SimpleImputer(strategy=self.strategy)
@@ -53,7 +54,11 @@ class df_imputer(TransformerMixin, BaseEstimator):
         # assumes X is a DataFrame
         Ximp = self.imp.transform(X)
         Xfilled = pd.DataFrame(Ximp, index=X.index, columns=X.columns)
+        self.columns = Xfilled.columns
         return Xfilled
+    
+    def get_features_name(self):
+        return list(self.columns)
 
     
 class df_scaler(TransformerMixin, BaseEstimator):
@@ -89,7 +94,7 @@ class df_scaler(TransformerMixin, BaseEstimator):
         self.columns = X.columns
         return Xscaled
     
-    def get_feature_names(self):
+    def get_features_name(self):
         return list(self.columns)
 
 
