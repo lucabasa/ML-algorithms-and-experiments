@@ -89,3 +89,39 @@ def plot_two_hyperparms(result, param_x, param_y, pretty_name, negative=True, sa
         plt.savefig('plots/' + save)
     
     plt.show()
+    
+    
+def _label_point(x, y, val, ax):
+    a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
+    for i, point in a.iterrows():
+        ax.text(point['x'], point['y'], str(point['val']))
+    return ax
+
+
+def plot_coefficients(target_name, est_coefs, annotate=False):
+    coefs_real = pd.read_pickle('data/simulated/coefficients.pkl')
+    coefs_real = coefs_real['tar_lin_unc']
+    
+    comparison = pd.merge(coefs_real, coefs_est.reset_index(), on='feat', how='left').fillna(0)
+    
+    fig, ax = plt.subplots(1,2, figsize=(13,6))
+    
+    ax[0].scatter(comparison.coef, comparison['mean'], color='k')
+    ax[0] = _plot_diagonal(ax[0])
+    if annotate:
+        ax[0] = _label_point(comparison.coef, comparison['mean'], comparison.feat, ax[0])
+        
+    ax[0].set_xlabel('True Coefficient', fontsize=12)
+    ax[0].set_ylabel('Estimated Coefficient', fontsize=12)
+    ax[0].set_title('True vs Estimated', fontsize=14)
+        
+    ax[1].scatter(comparison.feat, comparison.coef, color='g', alpha=0.7)
+    ax[1].scatter(comparison.feat, comparison['mean'], color='r', alpha=0.7)
+    ax[1].errorbar(comparison.feat, comparison['mean'], yerr=comparison['std'], 
+                   ls='none', color='r', alpha=0.3)
+    
+    ax[1].set_xticklabels(comparison.feat, rotation=70)
+    ax[1].set_title('Coefficient values', fontsize=14)
+    
+    plt.show()
+    

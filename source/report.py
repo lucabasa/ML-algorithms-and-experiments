@@ -90,10 +90,9 @@ def plot_predictions(data, true_label, pred_label, feature=None, hue=None, legen
     ax[0].set_title(f'{feature} vs Predictions')
     ax[1].set_title(f'{feature} vs Residuals')
     
-    if not savename.endswith('.png'):
-        savename += '.png'
-    plt.savefig('plots/' + savename)
-    plt.close()
+    if savename:
+        plt.savefig('plots/' + savename)
+    plt.show()
 
 
 def evaluate(data, y_true, y_pred, pipe, feat='coef', hue=None, legend=False, savename='test.png'):

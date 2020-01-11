@@ -57,7 +57,7 @@ class df_imputer(TransformerMixin, BaseEstimator):
         self.columns = Xfilled.columns
         return Xfilled
     
-    def get_features_name(self):
+    def get_feature_names(self):
         return list(self.columns)
 
     
@@ -94,7 +94,7 @@ class df_scaler(TransformerMixin, BaseEstimator):
         self.columns = X.columns
         return Xscaled
     
-    def get_features_name(self):
+    def get_feature_names(self):
         return list(self.columns)
 
 
@@ -140,7 +140,7 @@ class dummify(TransformerMixin, BaseEstimator):
             self.columns = X.columns
         return X
     
-    def get_features_name(self):
+    def get_feature_names(self):
         return self.columns
 
  
@@ -171,7 +171,7 @@ class FeatureUnion_df(TransformerMixin, BaseEstimator):
         columns = []
         
         for trsnf in self.transformer_list:
-            cols = trsnf[1].steps[-1][1].get_features_name()
+            cols = trsnf[1].steps[-1][1].get_feature_names()
             columns += list(cols)
 
         X_tr = pd.DataFrame(X_tr, index=X.index, columns=columns)
