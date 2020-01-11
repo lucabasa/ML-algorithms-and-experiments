@@ -2,6 +2,10 @@ __author__ = 'lucabasa'
 __version__ = '1.0.0'
 __status__ = 'development'
 
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.tri as tri
+
 
 def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=False):
     
@@ -41,3 +45,47 @@ def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=Fal
 
     plt.show()
 
+
+def plot_two_hyperparms(result, param_x, param_y, pretty_name, negative=True, save=False):
+    
+    if negative:
+        res = result.copy()
+        res['mean_test_score'] = -res['mean_test_score']
+    else:
+        res = result.copy()
+
+    fig, ax = plt.subplots(1,2, figsize=(15,6))
+
+    X_axis = res[param_x].astype(float)
+    Y_axis = res[param_y].astype(float)
+
+    xg, yg = np.meshgrid(np.linspace(X_axis.min(), X_axis.max(), 100),
+                         np.linspace(Y_axis.min(), Y_axis.max(), 100))
+    
+    triangles = tri.Triangulation(X_axis, Y_axis)
+    tri_interp = tri.CubicTriInterpolator(triangles, res['mean_test_score'])
+    zg = tri_interp(xg, yg)
+    
+    ax[0].contourf(xg, yg, zg, 
+                   norm=plt.Normalize(vmax=res['mean_test_score'].max(), vmin=res['mean_test_score'].min()),
+                   cmap=plt.cm.terrain)
+    
+    tri_interp = tri.CubicTriInterpolator(triangles, res['mean_fit_time'])
+    zg = tri_interp(xg, yg)
+    
+    ax[1].contourf(xg, yg, zg, 
+                   norm=plt.Normalize(vmax=res['mean_fit_time'].max(), vmin=res['mean_fit_time'].min()), 
+                   cmap=plt.cm.terrain)
+    
+    ax[0].set_xlabel(param_x.split('__')[-1].title(), fontsize=12)
+    ax[1].set_xlabel(param_x.split('__')[-1].title(), fontsize=12)
+    ax[0].set_ylabel(param_y.split('__')[-1].title(), fontsize=12)
+    ax[1].set_ylabel(param_y.split('__')[-1].title(), fontsize=12)
+    ax[0].set_title('Test Score', fontsize=14)
+    ax[1].set_title('Fit Time', fontsize=14)
+    fig.suptitle(f'{pretty_name}', fontsize=18)
+    
+    if save:
+        plt.savefig('plots/' + save)
+    
+    plt.show()
