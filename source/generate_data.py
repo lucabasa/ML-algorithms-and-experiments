@@ -169,7 +169,8 @@ def make_targets(data):
 
 
 def dirtify(data):
-    df = data.copy()
+    # do not add missing values to the targets
+    df = data[[col for col in data.columns if 'tar_' not in col]].copy()
     n_entries = df.shape[0]
     np.random.seed(23)
     
@@ -186,5 +187,8 @@ def dirtify(data):
     # adding 0.5% missing values
     missing = np.random.random(df.shape)<0.005
     df = df.mask(missing)
+    
+    # putting the targets back
+    df = df.join(data[[col for col in data.columns if 'tar_' in col]])
     
     return df
