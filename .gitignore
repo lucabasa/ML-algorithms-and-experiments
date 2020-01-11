@@ -2,4 +2,5 @@ data/
 plots/
 MLalgo/
 .ipynb_checkpoints/
+__pycache__/
 

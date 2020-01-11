@@ -1,3 +1,7 @@
+__author__ = 'lucabasa'
+__version__ = '1.1.0'
+__status__ = 'development'
+
 import pandas as pd
 import numpy as np
 import string
@@ -69,24 +73,43 @@ def linear_targets(data, tmp):
     np.random.seed(23)
     entries = df.shape[0]
     
+    coef_dict = {}
+    
     # all
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75, 0.69, -9.47, 0.73, 1.98, 4.61,
        -0.5, 3.8, 0.16, -0.4, -1]
     df['tar_lin_full'] = tmp.multiply(coefs, axis=1).sum(axis=1) + np.random.normal(2, 1, size=entries)
+    coef_dict['tar_lin_full'] = pd.DataFrame({'feat': tmp.columns, 'coef': coefs})
     
     # all the uncorrelated
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75]
-    df['tar_lin_unc'] = tmp[[col for col in tmp.columns if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) + np.random.normal(1, 0.4, size=entries)
+    df['tar_lin_unc'] = (tmp[[col for col in tmp.columns if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) + 
+                         np.random.normal(1, 0.4, size=entries))
+    coef_dict['tar_lin_unc'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('unc_')], 'coef': coefs})
     
     # all the correlated
-    coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, -6, 2.36, 7.3, -0.8]
-    df['tar_lin_corr'] = tmp[[col for col in tmp.columns if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) + np.random.normal(4, 1, size=entries)
+    coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, -6, 2.36, -0.8]
+    df['tar_lin_corr'] = (tmp[[col for col in tmp.columns if col.startswith('corr_')]].multiply(coefs, axis=1).sum(axis=1) + 
+                          np.random.normal(4, 1, size=entries))
+    coef_dict['tar_lin_corr'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('corr_')], 'coef': coefs})
     
     # 3 variables
     coefs = [0.4, -0.01, 0.03]
-    df['tar_lin_3'] = tmp[['unc_normal_1', 'corr_normal_by_cat', 'corr_multinormal_mid_a']].multiply(coefs, axis=1).sum(axis=1) + np.random.normal(-0.7, 1, size=entries)
+    df['tar_lin_3'] = (tmp[['unc_normal_1', 'corr_normal_by_cat', 'corr_multinormal_mid_a']].multiply(coefs, axis=1).sum(axis=1) + 
+                       np.random.normal(-0.7, 1, size=entries))
+    coef_dict['tar_lin_3'] = pd.DataFrame({'feat': ['unc_normal_1', 'corr_normal_by_cat', 'corr_multinormal_mid_a'], 'coef': coefs})
     
-    return df
+    # 3 variables and interactions
+    coefs = [0.4, -0.01, 0.03]
+    df['tar_lin_3int'] = (tmp[['unc_normal_1', 'corr_normal_by_cat', 'corr_multinormal_mid_a']].multiply(coefs, axis=1).sum(axis=1) + 
+                          0.6 * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] -
+                          1.3 * tmp['corr_normal_by_cat'] * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] + 
+                          np.random.normal(-0.7, 1, size=entries))
+    coef_dict['tar_lin_3int'] = pd.DataFrame({'feat': ['unc_normal_1', 'corr_normal_by_cat', 'corr_multinormal_mid_a', 
+                                                       'unc_normal_1__corr_normal_by_cat', 'all_3'], 
+                                              'coef': coefs + [0.6, 1.3]})
+    
+    return df, coef_dict
 
 
 def nonlinear_targets(data, tmp):
@@ -94,25 +117,44 @@ def nonlinear_targets(data, tmp):
     np.random.seed(23)
     entries = df.shape[0]
     
+    coef_dict = {}
+    
     # all
     coefs = [3, 0.4, 0.01, 0.03, 2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75, 0.69, 9.47, 0.73, 1.98, 4.61,
        0.5, 3.8, 0.16, 0.4, 1]
     df['tar_nonlin_full'] = 0.5*np.expm1(-tmp.multiply(coefs, axis=1).sum(axis=1) / 10) + np.random.normal(2, 1, size=entries)
+    coef_dict['tar_nonlin_full'] = pd.DataFrame({'feat': tmp.columns, 'coef': coefs})
     
     # all the uncorrelated
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75]
-    df['tar_nonlin_unc'] = np.expm1(tmp[[col for col in tmp.columns 
-                                         if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) / 20) + np.random.normal(1, 0.4, size=entries)
+    df['tar_nonlin_unc'] = (np.expm1(tmp[[col for col in tmp.columns 
+                                         if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) / 20) + 
+                            np.random.normal(1, 0.4, size=entries))
+    coef_dict['tar_nonlin_unc'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('unc_')], 'coef': coefs})
     
     # all the correlated
-    coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, -6, 2.36, 7.3, -0.8]
-    df['tar_nonlin_corr'] = np.expm1(tmp[[col for col in tmp.columns 
-                                          if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) / 20) + np.random.normal(4, 1, size=entries)
+    coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, -6, 2.36, -0.8]
+    df['tar_nonlin_corr'] = (np.expm1(tmp[[col for col in tmp.columns 
+                                          if col.startswith('corr_')]].multiply(coefs, axis=1).sum(axis=1) / 20) + 
+                             np.random.normal(4, 1, size=entries))
+    coef_dict['tar_nonlin_corr'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('corr_')], 'coef': coefs})
     
     # 3 variables
-    df['tar_nonlin_3'] = 0.04*tmp['unc_ordinal']**2 - 0.09*tmp['corr_normal_by_cat'] + 0.8*np.tanh(tmp['corr_multinormal_mid_a']) + np.random.normal(-0.7, 1, size=entries)
+    df['tar_nonlin_3'] = (0.04*tmp['unc_ordinal']**2 - 0.09*tmp['corr_normal_by_cat'] + 0.8*np.tanh(tmp['corr_multinormal_mid_a']) + 
+                          np.random.normal(-0.7, 1, size=entries))
+    coef_dict['tar_nonlin_3'] = pd.DataFrame({'feat': ['unc_normal_1_squared', 'corr_normal_by_cat', 'corr_multinormal_mid_a_tanh'], 
+                                           'coef': [0.04, -0.09, 0.8]})
     
-    return df
+    # 3 variables and interactions
+    df['tar_nonlin_3int'] = (0.04*tmp['unc_ordinal']**2 - 0.09*tmp['corr_normal_by_cat'] + 0.8*np.tanh(tmp['corr_multinormal_mid_a']) + 
+                          0.6 * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] -
+                          1.3 * tmp['corr_normal_by_cat'] * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] + 
+                          np.random.normal(-0.7, 1, size=entries))
+    coef_dict['tar_nonlin_3int'] = pd.DataFrame({'feat': ['unc_normal_1_squared', 'corr_normal_by_cat', 'corr_multinormal_mid_a_tanh', 
+                                                          'unc_normal_1__corr_normal_by_cat', 'all_3'], 
+                                           'coef': [0.04, -0.09, 0.8, 0.6, -1.3]})
+    
+    return df, coef_dict
 
 
 def make_targets(data):
@@ -120,10 +162,10 @@ def make_targets(data):
     tmp['unc_categories_100'] = tmp.unc_categories_100.astype('category').cat.codes.astype(int)
     tmp = pd.get_dummies(tmp, drop_first=True)
     
-    df = linear_targets(data, tmp)
-    df = nonlinear_targets(df, tmp)
+    df, coef_lin = linear_targets(data, tmp)
+    df, coef_nonlin = nonlinear_targets(df, tmp)
 
-    return df
+    return df, coef_lin, coef_nonlin
 
 
 def dirtify(data):
