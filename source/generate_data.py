@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __status__ = 'development'
 
 import pandas as pd
@@ -65,6 +65,13 @@ def make_correlated(data, n_entries):
     df['corr_multinormal_low_b'] = 0
     df[['corr_multinormal_low_a', 'corr_multinormal_low_b']] = np.random.multivariate_normal(mean=[-6, 4], cov=[[1, 0.3], [0.3, 2]], size=n_entries)
     
+    df[['corr_multinormal_mid_a', 'corr_multinormal_mid_b', 
+        'corr_multinormal_low_a', 'corr_multinormal_low_b']] += np.random.multivariate_normal(mean=[0, 0, 0, 0], 
+                                                                                              cov=[[2, -0.8, -1.2, 0.02], 
+                                                                                                   [-0.8, 0.5, 0, 0], 
+                                                                                                   [-1.2, 0, 7, 0.9], 
+                                                                                                   [0.02, 0, 0.9, 5]], size=n_entries)
+    
     return df
 
 
@@ -78,7 +85,7 @@ def linear_targets(data, tmp):
     # all
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75, 0.69, -9.47, 0.73, 1.98, 4.61,
        -0.5, 3.8, 0.16, -0.4, -1]
-    df['tar_lin_full'] = tmp.multiply(coefs, axis=1).sum(axis=1) + np.random.normal(2, 1, size=entries)
+    df['tar_lin_full'] = tmp.multiply(coefs, axis=1).sum(axis=1) + np.random.normal(0, 11, size=entries)
     coef_dict['tar_lin_full'] = pd.DataFrame({'feat': tmp.columns, 'coef': coefs})
     
     # all the uncorrelated
@@ -90,7 +97,7 @@ def linear_targets(data, tmp):
     # all the correlated
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, -6, 2.36, -0.8]
     df['tar_lin_corr'] = (tmp[[col for col in tmp.columns if col.startswith('corr_')]].multiply(coefs, axis=1).sum(axis=1) + 
-                          np.random.normal(4, 1, size=entries))
+                          np.random.normal(4, 3, size=entries))
     coef_dict['tar_lin_corr'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('corr_')], 'coef': coefs})
     
     # 3 variables
@@ -122,37 +129,37 @@ def nonlinear_targets(data, tmp):
     # all
     coefs = [3, 0.4, 0.01, 0.03, 2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75, 0.69, 9.47, 0.73, 1.98, 4.61,
        0.5, 3.8, 0.16, 0.4, 1]
-    df['tar_nonlin_full'] = 0.5*np.expm1(-tmp.multiply(coefs, axis=1).sum(axis=1) / 10) + np.random.normal(2, 1, size=entries)
+    df['tar_nonlin_full'] = 0.5*np.expm1(-tmp.multiply(coefs, axis=1).sum(axis=1) / 100) + np.random.normal(2, 2, size=entries)
     coef_dict['tar_nonlin_full'] = pd.DataFrame({'feat': tmp.columns, 'coef': coefs})
     
     # all the uncorrelated
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, 6, 2.36, 7.3, 0.75]
     df['tar_nonlin_unc'] = (np.expm1(tmp[[col for col in tmp.columns 
                                          if col.startswith('unc_')]].multiply(coefs, axis=1).sum(axis=1) / 20) + 
-                            np.random.normal(1, 0.4, size=entries))
+                            np.random.normal(0, 10, size=entries))
     coef_dict['tar_nonlin_unc'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('unc_')], 'coef': coefs})
     
     # all the correlated
     coefs = [3, 0.4, -0.01, 0.03, -2.4, 0.11, 0.1, -6, 2.36, -0.8]
     df['tar_nonlin_corr'] = (np.expm1(tmp[[col for col in tmp.columns 
                                           if col.startswith('corr_')]].multiply(coefs, axis=1).sum(axis=1) / 20) + 
-                             np.random.normal(4, 1, size=entries))
+                             np.random.normal(4, 2, size=entries))
     coef_dict['tar_nonlin_corr'] = pd.DataFrame({'feat': [col for col in tmp.columns if col.startswith('corr_')], 'coef': coefs})
     
     # 3 variables
     df['tar_nonlin_3'] = (0.04*tmp['unc_ordinal']**2 - 0.09*tmp['corr_normal_by_cat'] + 0.8*np.tanh(tmp['corr_multinormal_mid_a']) + 
-                          np.random.normal(-0.7, 1, size=entries))
+                          np.random.normal(-0.7, 10, size=entries))
     coef_dict['tar_nonlin_3'] = pd.DataFrame({'feat': ['unc_normal_1_squared', 'corr_normal_by_cat', 'corr_multinormal_mid_a_tanh'], 
                                            'coef': [0.04, -0.09, 0.8]})
     
     # 3 variables and interactions
-    df['tar_nonlin_3int'] = (0.04*tmp['unc_ordinal']**2 - 0.09*tmp['corr_normal_by_cat'] + 0.8*np.tanh(tmp['corr_multinormal_mid_a']) + 
+    df['tar_nonlin_3int'] = (0.04*tmp['unc_ordinal']**2 - 0.09*tmp['corr_normal_by_cat'] - 0.8*np.tanh(tmp['corr_multinormal_mid_a']) + 
                           0.6 * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] -
-                          1.3 * tmp['corr_normal_by_cat'] * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] + 
-                          np.random.normal(-0.7, 1, size=entries))
+                          0.3 * tmp['corr_normal_by_cat'] * tmp['unc_normal_1'] * tmp['corr_normal_by_cat'] + 
+                          np.random.normal(-0.7, 10, size=entries))
     coef_dict['tar_nonlin_3int'] = pd.DataFrame({'feat': ['unc_normal_1_squared', 'corr_normal_by_cat', 'corr_multinormal_mid_a_tanh', 
                                                           'unc_normal_1__corr_normal_by_cat', 'all_3'], 
-                                           'coef': [0.04, -0.09, 0.8, 0.6, -1.3]})
+                                           'coef': [0.04, -0.09, 0.8, 0.6, -0.3]})
     
     return df, coef_dict
 
@@ -175,8 +182,10 @@ def dirtify(data):
     np.random.seed(23)
     
     # adding random noise to some columns
-    df['unc_normal_1'] += np.random.normal(loc=0, scale=0.5, size=n_entries) / 10
-    df['corr_normal_by_cat'] += np.random.normal(loc=-0.5, scale=0.4, size=n_entries) / 10
+    df['unc_normal_1'] += np.random.normal(loc=0, scale=15, size=n_entries) / 10
+    df['corr_normal_by_cat'] += np.random.normal(loc=-0.5, scale=5, size=n_entries) / 10
+    df['unc_skewed_neg'] += np.random.normal(loc=0, scale=50, size=n_entries) / 10
+    
     
     # make outliers
     random_entries = np.random.random(df.shape[0])<0.00001
