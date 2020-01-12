@@ -182,12 +182,13 @@ def high_low_errors(data, *, res_list=None, n_samples=50,
     return errors
 
 
-def make_results(label, prediction, model, parameters, target_name, variables, verbose=False):
+def make_results(label, prediction, model, parameters, target_name, variables, instances, verbose=False):
     results=pd.DataFrame({'Date': [date.today().strftime("%d/%m/%Y")], 
                           'Model': [model],
                           'Parameters': [parameters], 
                           'Target': target_name, 
-                          'Variables': variables})
+                          'Variables': variables, 
+                          'N_instances': instances})
     
     results['MAE'] = mean_absolute_error(y_true=label, y_pred=prediction)
     results['MSE'] = mean_squared_error(y_true=label, y_pred=prediction)
@@ -203,9 +204,9 @@ def make_results(label, prediction, model, parameters, target_name, variables, v
     return results
 
 
-def store_results(file_loc, label, prediction, model, parameters, target_name, variables, verbose=False):
+def store_results(file_loc, label, prediction, model, parameters, target_name, variables, instances, verbose=False):
     
-    results = make_results(label, prediction, model, parameters, target_name, variables, verbose)
+    results = make_results(label, prediction, model, parameters, target_name, variables, instances, verbose)
     
     if not exists(file_loc):
         results.to_csv(file_loc, index=False)
