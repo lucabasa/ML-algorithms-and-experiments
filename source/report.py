@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __status__ = 'development'
 
 
@@ -9,7 +9,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, explained_variance_score, max_error
+
+from datetime import date
+from os.path import exists
 
 
 def _plot_diagonal(ax):
@@ -177,3 +180,37 @@ def high_low_errors(data, *, res_list=None, n_samples=50,
             errors[name] = high_err.describe().fillna(0) - low_err.describe().fillna(0)
         
     return errors
+
+
+def make_results(label, prediction, model, parameters, target_name, variables, verbose=False):
+    results=pd.DataFrame({'Date': [date.today().strftime("%d/%m/%Y")], 
+                          'Model': [model],
+                          'Parameters': [parameters], 
+                          'Target': target_name, 
+                          'Variables': variables})
+    
+    results['MAE'] = mean_absolute_error(y_true=label, y_pred=prediction)
+    results['MSE'] = mean_squared_error(y_true=label, y_pred=prediction)
+    results['Max_error'] = max_error(y_true=label, y_pred=prediction)
+    results['Explained_var'] = explained_variance_score(y_true=label, y_pred=prediction)
+
+    if verbose:
+        print(f'MAE: \t\t {round(results["MAE"].values[0], 5)}')
+        print(f'MSE: \t\t {round(results["MSE"].values[0], 5)}')
+        print(f'Max Error: \t {round(results["Max_error"].values[0], 5)}')
+        print(f'Expl Variance: \t {round(results["Explained_var"].values[0], 5)}')
+    
+    return results
+
+
+def store_results(file_loc, label, prediction, model, parameters, target_name, variables, verbose=False):
+    
+    results = make_results(label, prediction, model, parameters, target_name, variables, verbose)
+    
+    if not exists(file_loc):
+        results.to_csv(file_loc, index=False)
+    else:
+        old_results = pd.read_csv(file_loc)
+        results = pd.concat([old_results, results])
+        results.to_csv(file_loc, index=False) 
+    return
