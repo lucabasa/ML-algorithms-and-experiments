@@ -1,11 +1,13 @@
 __author__ = 'lucabasa'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __status__ = 'development'
 
 import pandas as pd
 import numpy as np
 import string
 import random
+
+from sklearn.datasets import make_regression
 
 
 def make_uncorrelated(data, n_entries):
@@ -24,7 +26,7 @@ def make_uncorrelated(data, n_entries):
     df['unc_categories_5'] = np.random.choice(['a', 'b', 'c', 'd', 'e'], size=(n_entries,), p=[2/5, 1/5, 1/10, 3/15, 1/10])
     i = 0
     random_cats = []
-    # generate 100 random strings of 3 categories
+    # generate 100 random strings of 3 characters
     while i < 100:
         random_cats.append(''.join([random.choice(string.ascii_lowercase) for _ in range(3)]))
         i += 1
@@ -201,3 +203,25 @@ def dirtify(data):
     df = df.join(data[[col for col in data.columns if 'tar_' in col]])
     
     return df
+
+
+def make_data_regression(n_features, n_informative, noise, effective_rank=None, tail_stregth=0.5):
+    data_sim, target, coefficients = make_regression(n_samples=100000, 
+                                                 n_features=n_features, n_informative=n_informative, 
+                                                 effective_rank=effective_rank, tail_strength=tail_stregth,
+                                                 coef=True, random_state=21, noise=noise)
+    
+    random.seed(23)
+    i = 0
+    random_names = []
+    # generate n_features random strings of 5 characters
+    while i < n_features:
+        random_names.append(''.join([random.choice(string.ascii_lowercase) for _ in range(5)]))
+        i += 1
+    
+    data_sim = pd.DataFrame(data_sim, columns=random_names)
+    data_sim['target'] = target
+
+    coeff = pd.DataFrame({'variable': random_names, 'coefficient': coefficients})
+    
+    return data_sim, coeff
