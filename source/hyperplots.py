@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
+import numpy as np
 from sklearn.model_selection import learning_curve
 
 
@@ -102,7 +103,7 @@ def _label_point(x, y, val, ax):
 
 def plot_coefficients(target_name, est_coefs, annotate=False):
     coefs_real = pd.read_pickle('data/simulated/coefficients.pkl')
-    coefs_real = coefs_real['tar_lin_unc']
+    coefs_real = coefs_real[target_name]
     
     comparison = pd.merge(coefs_real, coefs_est.reset_index(), on='feat', how='left').fillna(0)
     
