@@ -103,10 +103,14 @@ def _label_point(x, y, val, ax):
     return ax
 
 
-def plot_coefficients(target_name, est_coefs, annotate=False):
-    coefs_real = pd.read_pickle('data/simulated/coefficients.pkl')
-    coefs_real = coefs_real[target_name]
-    
+def plot_coefficients(target_name, est_coefs, coefs_real=None, annotate=False):
+    if coefs_real is None:
+        coefs_real = pd.read_pickle('data/simulated/coefficients.pkl')
+        coefs_real = coefs_real[target_name]       
+    else:
+        coefs_real = pd.read_csv(coefs_real)
+        coefs_real.rename(columns={'variable': 'feat', 'coefficient': 'coef'}, inplace=True)
+
     comparison = pd.merge(coefs_real, est_coefs.reset_index(), on='feat', how='left').fillna(0)
     
     fig, ax = plt.subplots(1,2, figsize=(13,6))
