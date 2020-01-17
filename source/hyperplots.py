@@ -5,8 +5,10 @@ __status__ = 'development'
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+from source.report import _plot_diagonal
 
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import learning_curve
 
 
@@ -105,7 +107,7 @@ def plot_coefficients(target_name, est_coefs, annotate=False):
     coefs_real = pd.read_pickle('data/simulated/coefficients.pkl')
     coefs_real = coefs_real[target_name]
     
-    comparison = pd.merge(coefs_real, coefs_est.reset_index(), on='feat', how='left').fillna(0)
+    comparison = pd.merge(coefs_real, est_coefs.reset_index(), on='feat', how='left').fillna(0)
     
     fig, ax = plt.subplots(1,2, figsize=(13,6))
     
