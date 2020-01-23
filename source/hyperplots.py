@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __status__ = 'development'
 
 import matplotlib.pyplot as plt
@@ -22,8 +22,11 @@ def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=Fal
         res = result.copy()
 
     fig, ax = plt.subplots(1,2, figsize=(15,6))
-
-    X_axis = res[param_name].astype(float)
+    
+    try:
+        X_axis = res[param_name].astype(float)
+    except ValueError:
+        X_axis = res[param_name]
 
     ax[0].plot(X_axis, res['mean_train_score'], label='Train', color='r', alpha=.6)
     ax[0].fill_between(X_axis, (res['mean_train_score'] - res['std_train_score']).astype(float),
