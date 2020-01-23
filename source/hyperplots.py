@@ -12,7 +12,7 @@ import pandas as pd
 from sklearn.model_selection import learning_curve
 
 
-def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=False):
+def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=False, uncertainty=True):
     
     if negative:
         res = result.copy()
@@ -29,11 +29,12 @@ def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=Fal
         X_axis = res[param_name]
 
     ax[0].plot(X_axis, res['mean_train_score'], label='Train', color='r', alpha=.6)
-    ax[0].fill_between(X_axis, (res['mean_train_score'] - res['std_train_score']).astype(float),
-                            (res['mean_train_score'] + res['std_train_score']).astype(float), alpha=0.1, color='r')
     ax[0].plot(X_axis, res['mean_test_score'], label='Test', color='g', alpha=.6)
-    ax[0].fill_between(X_axis, (res['mean_test_score'] - res['std_test_score']).astype(float),
-                            (res['mean_test_score'] + res['std_test_score']).astype(float), alpha=0.1, color='g')
+    if uncertainty:
+        ax[0].fill_between(X_axis, (res['mean_train_score'] - res['std_train_score']).astype(float),
+                                (res['mean_train_score'] + res['std_train_score']).astype(float), alpha=0.1, color='r')
+        ax[0].fill_between(X_axis, (res['mean_test_score'] - res['std_test_score']).astype(float),
+                                (res['mean_test_score'] + res['std_test_score']).astype(float), alpha=0.1, color='g')
 
     ax[1].plot(X_axis, res['mean_fit_time'], label='Fit', color='r', alpha=.6)
     ax[1].fill_between(X_axis, (res['mean_fit_time'] - res['std_fit_time']).astype(float),
