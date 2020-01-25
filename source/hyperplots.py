@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __status__ = 'development'
 
 import matplotlib.pyplot as plt
@@ -128,10 +128,11 @@ def plot_coefficients(target_name, est_coefs, coefs_real=None, annotate=False):
     ax[0].set_ylabel('Estimated Coefficient', fontsize=12)
     ax[0].set_title('True vs Estimated', fontsize=14)
         
-    ax[1].scatter(comparison.feat, comparison.coef, color='g', alpha=0.7)
-    ax[1].scatter(comparison.feat, comparison['mean'], color='r', alpha=0.7)
+    ax[1].scatter(comparison.feat, comparison.coef, color='g', alpha=0.7, label='True')
+    ax[1].scatter(comparison.feat, comparison['mean'], color='r', alpha=0.7, label='Est.')
     ax[1].errorbar(comparison.feat, comparison['mean'], yerr=comparison['std'], 
                    ls='none', color='r', alpha=0.3)
+    ax[1].legend()
     
     ax[1].set_xticklabels(comparison.feat, rotation=70)
     ax[1].set_title('Coefficient values', fontsize=14)
