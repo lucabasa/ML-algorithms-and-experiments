@@ -143,7 +143,7 @@ class dummify(TransformerMixin, BaseEstimator):
     def get_feature_names(self):
         return self.columns
 
- 
+
 class FeatureUnion_df(TransformerMixin, BaseEstimator):
     '''
     Wrapper of FeatureUnion but returning a Dataframe, 
