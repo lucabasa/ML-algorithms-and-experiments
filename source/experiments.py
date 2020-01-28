@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __status__ = 'development'
 
 import source.hyperplots as hyp
@@ -63,7 +63,7 @@ def skl_exp(model, data_name, features, kfolds,
                            target_name=target_name, variables=features, instances=df_train.shape[0], verbose=True)
 
 
-def learning_curve(model, data_name=None, target_name=None, 
+def learning_curve(model, kfolds, data_name=None, target_name=None, 
                    features='all', sample=None, scoring='neg_mean_absolute_error'):
     '''
     Wrapper around hyp.plot_learning_curve to facilitate feature selection and instances selection
@@ -99,7 +99,7 @@ def learning_curve(model, data_name=None, target_name=None,
     
     df_train = select_features(features, df_train, target_name, coef_names)
 
-    hyp.plot_learning_curve(model, title, df_train, target, scoring=scoring)
+    hyp.plot_learning_curve(model, title, df_train, target, scoring=scoring, cv=kfolds, n_jobs=-1)
 
         
 def select_features(features, data, target_name, coef_names):
