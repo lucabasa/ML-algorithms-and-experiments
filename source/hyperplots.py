@@ -1,9 +1,9 @@
 __author__ = 'lucabasa'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __status__ = 'development'
 
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
+import seaborn as sns
 import matplotlib.tri as tri
 from source.report import _plot_diagonal
 
@@ -210,3 +210,11 @@ def plot_learning_curve(estimator, title, X, y, scoring=None, ylim=None, cv=None
     
     plt.show()
     
+    
+def plot_coef_est(coefs_est):
+    plt.figure(figsize=(14, 12))
+    sns.barplot(x="mean", y="feat", 
+                data=coefs_est.head(50).reset_index(), 
+                xerr=coefs_est.head(50)['std'])
+    plt.show()
+
