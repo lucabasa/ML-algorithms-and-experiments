@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 __status__ = 'development'
 
 import matplotlib.pyplot as plt
@@ -24,7 +24,9 @@ def plot_hyperparameter(result, param_name, pretty_name, negative=True, save=Fal
     fig, ax = plt.subplots(1,2, figsize=(15,6))
     
     try:
-        X_axis = res[param_name].astype(float)
+        res[param_name] = res[param_name].astype(float)
+        res = res.sort_values(param_name)
+        X_axis = res[param_name]
     except ValueError:
         X_axis = res[param_name]
 
