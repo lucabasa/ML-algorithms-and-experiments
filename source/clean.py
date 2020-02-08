@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __status__ = 'development'
 
 
@@ -25,7 +25,8 @@ class general_cleaner(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
     
-    def transform(self, X, y=None):
+    def transform(self, X_in, y=None):
+        X = X_in.copy()
         if self._train:
             # remove known outliers from train set
             X = X.loc[X.GrLivArea < 4500].reset_index(drop=True)
