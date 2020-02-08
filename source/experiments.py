@@ -54,7 +54,7 @@ def hp_model(model):
     cat_pipe = Pipeline([('fs', df_p.feat_sel('category')),
                          ('imputer', df_p.df_imputer(strategy='most_frequent')), 
                          ('ord', make_ordinal(['BsmtQual', 'ExterQual', 'HeatingQC'])), 
-                         ('recode', recode_cat()), 
+                         ('recode', recode_cat(te_neig=False, te_mssc=False)), 
                          ('dummies', df_p.dummify())])
 
     processing_pipe = df_p.FeatureUnion_df(transformer_list=[('cat_pipe', cat_pipe),
@@ -92,7 +92,7 @@ def make_exp(model, kfolds, hp=False, data_name=None, target_name=None, features
     '''
     random.seed(666)
     if hp:
-        df = _import_hp()
+        df = import_hp()
         target_name = 'HP'
         coef_names = ['']
         features = 'all'
