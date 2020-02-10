@@ -122,6 +122,10 @@ class general_cleaner(BaseEstimator, TransformerMixin):
         del X['MoSold']
         del X['YrSold']
         
+        # for simplicity
+        del X['Neighborhood']
+        del X['MSSubClass']
+        
          # after model iterations
         del X['KitchenAbvGr']
         del X['GarageQual']
