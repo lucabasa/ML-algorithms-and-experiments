@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __status__ = 'development'
 
 import source.hyperplots as hyp
@@ -187,4 +187,30 @@ def select_features(features, data, coef_names):
     else:
         raise KeyError('Wrong feature selection provided. Use all, exact, exact-10, or unobserved')
         
-        
+
+def grid_results(model, kfolds, param_grid, 
+                 hp=False, sample=None, data_name=None, target_name=None, 
+                 scoring='neg_mean_absolute_error'):
+    random.seed(666)
+    if hp:
+        df = import_hp()
+        model = hp_model(model)
+    elif data_name is None:
+        df, coef_names, coefs_file = _import_generated_data(target_name)
+    else:
+        df, coef_names, coefs_file = _import_sklearn_data(data_name)
+    if sample:
+        df = df.sample(sample)
+
+    target = df['target']
+    
+    if not hp:
+        df = pd.get_dummies(df, drop_first=True)
+
+    df_train = df.drop('target', axis=1)
+    
+    res, bp, _ = grid_search(df_train, target, model, param_grid, scoring, kfolds)
+    
+    print(bp)
+    
+    return res
