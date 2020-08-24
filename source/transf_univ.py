@@ -1,5 +1,5 @@
 __author__ = 'lucabasa'
-__version__ = '1.2.3'
+__version__ = '1.2.4'
 __status__ = 'development'
 
 
@@ -158,9 +158,9 @@ class FeatureUnion_df(TransformerMixin, BaseEstimator):
         self.transformer_weights = transformer_weights
         self.verbose = verbose  # these are necessary to work inside of GridSearch or similar
         self.feat_un = FeatureUnion(self.transformer_list, 
-                                    self.n_jobs, 
-                                    self.transformer_weights, 
-                                    self.verbose)
+                                    n_jobs=self.n_jobs, 
+                                    transformer_weights=self.transformer_weights, 
+                                    verbose=self.verbose)
         
     def fit(self, X, y=None):
         self.feat_un.fit(X, y)
